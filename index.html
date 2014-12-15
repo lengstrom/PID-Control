@@ -45,7 +45,7 @@
 
 				this.update = function(currentValue, targetValue) {
 					var currentTime = (new Date()).getTime();
-					var dt = (currentTime - lastTime)/200;
+					var dt = (currentTime - lastTime)/60;
 					lastTime = currentTime;
 					var currentError = (targetValue - currentValue);
 					var pTerm = currentError * this.p;
@@ -88,7 +88,7 @@
 					m:1,
 					g:9.8,
 					dim:10,
-					k_f:.3,
+					k_f:.1,
 					ax:0,
 					vx:0
 				};
@@ -149,7 +149,8 @@
 
 				this.updatePhysics = function() {
 					currentTime = (new Date()).getTime();
-					var dt = (currentTime - lastTime)/200;
+					var dt = (currentTime - lastTime)/10000;
+					console.log(dt);
 					var f = t.block.k_f * t.block.m * t.block.g * Math.abs(Math.cos(t.seeSaw.angle));
 					var dax = Math.sin(t.seeSaw.angle) * t.block.g * t.block.m;
 					if (dax > 0) {
@@ -189,7 +190,7 @@
 
 			document.getElementById('c').addEventListener('mousemove', function(e) {
 				var angle = Math.atanh((e.y - 500)/(e.x - 500))
-				a.seeSaw.angle = angle;
+				if (Math.abs(angle) < 60 * (Math.PI/180)) a.seeSaw.angle = angle;
 			});
 
 		</script>	
