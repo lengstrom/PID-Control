@@ -65,39 +65,41 @@
 				this.init(opts);
 			}
 
-			function PIDCanvas(c) {
+			function PIDCanvas(c, opts) {
+				var t = this;
 				var lastTime = 0;
 				var canvas = false;
 				var ctx = false;
 				this.init = function(c) {
-					debugger;
 					canvas = document.getElementById(c);
 					ctx = canvas.getContext('2d');
-					for (var i in opts) {
-						this[i] = opts[i];
+					if (opts in window) {
+						for (var i in opts) {
+							this[i] = opts[i];
+						}
 					}
 
-					requestAnimFrame(this.update)
+					requestAnimFrame(this.update);
 				};
 
 				this.block = {
 					x:0,
 					m:15,
-					k_f:.3
+					dim:10,
+					k_f:.3,
+					ax:0,
+					vx:0
 				};
 
 				this.seeSaw = {
-					theta:0,
+					theta:0.0,
 					length:300,
 					height:20
 				};
 
-				this.update = function() {
-					this.draw();
-					requestAnimFrame(this.update);
-				};
-
 				this.draw = function() {
+					// draw seeSaw
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
 					var center = {
 						x:canvas.width/2,
 						y:canvas.height/2
@@ -108,32 +110,53 @@
 					var p3 = {x:this.seeSaw.length/2, y:this.seeSaw.height/2};
 					var p4 = {x:-this.seeSaw.length/2, y:this.seeSaw.height/2};
 					var points = [p1, p2, p3, p4];
-					var t = this;
-					points = map(function(p) {
-						return rotatePoint(p, t.seeSaw.theta)
-					}, points);
-
-					points = map(function(p) {
-						return {x:p.x + center.x, y:p.x + center.y};
-					}, points);
+					points = points.map(function(p) {return rotatePoint(p, t.seeSaw.theta)});
+					points = points.map(function(p) {return {x:p.x + center.x, y:p.y + center.y};});
 
 					ctx.strokeStyle = '#000';
-					ctx.lineWidth = 3;
+					ctx.lineWidth = 2;
 					ctx.beginPath();
-					ctx.moveTo(points[0]);
-					ctx.lineTo(points[1]);
-					ctx.lineTo(points[2]);
-					ctx.lineTo(points[3]);
-					ctx.lineTo(points[0]);
+					ctx.moveTo(points[0].x,points[0].y);
+					ctx.lineTo(points[1].x,points[1].y);
+					ctx.lineTo(points[2].x,points[2].y);
+					ctx.lineTo(points[3].x,points[3].y);
+					ctx.lineTo(points[0].x,points[0].y);
 					ctx.stroke();
+
+					//draw block
+					p1 = {x:-this.block.dim,y:-this.block.dim};
+					p2 = {x:this.block.dim,y:-this.block.dim};
+					p3 = {x:this.block.dim,y:this.block.dim};
+					p4 = {x:-this.block.dim,y:this.block.dim};
+					points = [p1, p2, p3, p4];
+
+					points = points.map(function(p) {return {x:p.x + t.block.x, y:p.y - t.seeSaw.height};});
+					points = points.map(function(p) {return rotatePoint(p, t.seeSaw.theta)});
+					points = points.map(function(p) {return {x:p.x + center.x, y:p.y + center.y};});
+
+					ctx.strokeStyle = '#000';
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					ctx.moveTo(points[0].x,points[0].y);
+					ctx.lineTo(points[1].x,points[1].y);
+					ctx.lineTo(points[2].x,points[2].y);
+					ctx.lineTo(points[3].x,points[3].y);
+					ctx.lineTo(points[0].x,points[0].y);
+					ctx.stroke();
+
+				};
+
+				this.update = function() {
+					t.draw();
+					requestAnimFrame(t.update);
 				};
 
 				this.init(c);
 			}
 
 			function rotatePoint(p, theta) {
-				var rotX = Math.cos(thetaRad) * p.x - Math.sin(thetaRad) * p.y;
-				var rotY = Math.sin(thetaRad) * p.x + Math.cos(thetaRad) * p.y;
+				var rotX = Math.cos(theta) * p.x - Math.sin(theta) * p.y;
+				var rotY = Math.sin(theta) * p.x + Math.cos(theta) * p.y;
 
 				return {
 					x: rotX,
@@ -143,6 +166,6 @@
 
 			var a = new PIDCanvas('c');
 
-		</script>
+		</script>	
 	</body>
 </html>
