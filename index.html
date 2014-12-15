@@ -1,0 +1,56 @@
+<html>
+	<head>
+		<title>PID Control</title>
+		<script type="text/javascript">
+			window.requestAnimFrame = (function() {
+				return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
+				window.setTimeout(callback, 1000 / framerate);
+				};
+			})();
+
+			function PIDController(id) {
+				var lastTime = 0;
+				var lastError = false;
+				this.init = funciton() {
+					this.p = 0;
+					this.i = 0;
+					this.d = 0;
+
+					this.integral = 0;
+					lastTime = (new Date()).getTime();
+					lastError = false;
+				};
+
+				this.run = function() {
+					requestAnimFrame(this.update);
+				};
+
+				this.update = function(currentValue, targetValue) {
+					var currentTime = (new Date()).getTime();
+					var dt = currentTime - lastTime;
+					lastTime = currentTime;
+					var currentError = (targetValue - currentValue);
+					var pTerm = currentError * this.p;
+
+					this.integral += currentError;
+					var iTerm = this.integral * this.i;
+
+					var dTerm = 0;
+					if (lastError) {
+						dTerm = (currentError - lastError) * this.d;
+					}
+
+					var updateTerm = (pTerm + iTerm + dTerm)/dt;
+					return updateTerm;
+				}
+
+			}
+
+			var a = new PIDCanvas('c');
+			a.run();
+		</script>
+	</head>
+	<body>
+		<canvas id = 'c'></canvas>
+	</body>
+</html>
