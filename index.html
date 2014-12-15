@@ -85,16 +85,16 @@
 
 				this.block = {
 					x:0,
-					m:1,
+					m:15,
 					g:9.8,
 					dim:10,
-					k_f:.1,
+					k_f:.5,
 					ax:0,
 					vx:0
 				};
 
 				this.seeSaw = {
-					angle:0.2,
+					angle:0,
 					length:800,
 					height:20
 				};
@@ -154,16 +154,23 @@
 					var f = t.block.k_f * t.block.m * t.block.g * Math.abs(Math.cos(t.seeSaw.angle));
 					var dax = Math.sin(t.seeSaw.angle) * t.block.g * t.block.m;
 					if (dax > 0) {
-						dax -= f;
-						if (dax < 0) dax = 0;
-					} else {
-						dax += f; 
-						if (dax > 0) dax = 0;
+						f *= -1;
 					}
 
-					t.block.ax += dax * dt;
+					dax += f;
+					t.block.ax = dax * dt;
 					t.block.vx += t.block.ax;
-					t.block.x += t.block.vx;
+					if (sgn(t.block.vx) == sgn(f)) {
+						t.block.vx = 0;
+					}
+
+					if (Math.abs(t.block.x + t.block.vx) >= t.seeSaw.length/2 - t.block.dim) {
+						t.block.vx = 0;
+						t.block.x = Math.abs(t.seeSaw.length/2 - t.block.dim) * (t.block.x > 0 ? 1 : -1);
+					} else {
+						t.block.x += t.block.vx;
+					}
+
 					lastTime = currentTime;
 				};
 
@@ -184,6 +191,10 @@
 					x: rotX,
 					y: rotY
 				};
+			}
+
+			function sgn(x) {
+				return x >= 0 ? 1 : -1;
 			}
 
 			var a = new PIDCanvas('c');
