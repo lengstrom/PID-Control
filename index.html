@@ -195,10 +195,10 @@
 			var a = new PIDCanvas('c');
 			var controller = new PIDController({p:2, i:.001, d:300});
 
-			document.getElementById('c').addEventListener('mousemove', function(e) {
-				var angle = Math.atanh((e.y - parseInt(document.getElementById('c').height)/2)/(e.x - parseInt(document.getElementById('c').width)/2));
-				if (Math.abs(angle) < 60 * (Math.PI/180)) a.seeSaw.angle = angle;
-			});
+			// document.getElementById('c').addEventListener('mousemove', function(e) {
+			// 	var angle = Math.atanh((e.y - parseInt(document.getElementById('c').height)/2)/(e.x - parseInt(document.getElementById('c').width)/2));
+			// 	if (Math.abs(angle) < 60 * (Math.PI/180)) a.seeSaw.angle = angle;
+			// });
 
 			(function mainLoop() {
 				requestAnimFrame(mainLoop);
