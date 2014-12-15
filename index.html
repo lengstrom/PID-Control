@@ -39,10 +39,6 @@
 					}
 				};
 
-				this.run = function() {
-					requestAnimFrame(this.update);
-				};
-
 				this.update = function(currentValue, targetValue) {
 					var currentTime = (new Date()).getTime();
 					var dt = (currentTime - lastTime)/60;
@@ -57,7 +53,8 @@
 					if (lastError) {
 						dTerm = (currentError - lastError) * this.d;
 					}
-
+					lastError = currentError;
+					console.log(pTerm, iTerm, dTerm);
 					var updateTerm = (pTerm + iTerm + dTerm)/dt;
 					return updateTerm;
 				}
@@ -84,7 +81,7 @@
 				};
 
 				this.block = {
-					x:0,
+					x:300,
 					m:15,
 					g:9.8,
 					dim:10,
@@ -150,7 +147,6 @@
 				this.updatePhysics = function() {
 					currentTime = (new Date()).getTime();
 					var dt = (currentTime - lastTime)/10000;
-					console.log(dt);
 					var f = t.block.k_f * t.block.m * t.block.g * Math.abs(Math.cos(t.seeSaw.angle));
 					var dax = Math.sin(t.seeSaw.angle) * t.block.g * t.block.m;
 					if (dax > 0) {
@@ -177,7 +173,6 @@
 				this.update = function() {
 					t.updatePhysics();
 					t.draw();
-					requestAnimFrame(t.update);
 				};
 
 				this.init(c);
@@ -198,11 +193,19 @@
 			}
 
 			var a = new PIDCanvas('c');
+			var controller = new PIDController({p:.0000001, i:.000000001, d:.00005});
 
 			document.getElementById('c').addEventListener('mousemove', function(e) {
-				var angle = Math.atanh((e.y - 500)/(e.x - 500))
+				var angle = Math.atanh((e.y - parseInt(document.getElementById('c').height)/2)/(e.x - parseInt(document.getElementById('c').width)/2));
 				if (Math.abs(angle) < 60 * (Math.PI/180)) a.seeSaw.angle = angle;
 			});
+
+			(function mainLoop() {
+				requestAnimFrame(mainLoop);
+				a.update();
+				var adjust = controller.update(a.block.x, 0);
+				a.seeSaw.angle += adjust;
+			})();
 
 		</script>	
 	</body>
