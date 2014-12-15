@@ -193,7 +193,7 @@
 			}
 
 			var a = new PIDCanvas('c');
-			var controller = new PIDController({p:.0000001, i:.000000001, d:.00005});
+			var controller = new PIDController({p:2, i:.001, d:300});
 
 			document.getElementById('c').addEventListener('mousemove', function(e) {
 				var angle = Math.atanh((e.y - parseInt(document.getElementById('c').height)/2)/(e.x - parseInt(document.getElementById('c').width)/2));
@@ -203,7 +203,7 @@
 			(function mainLoop() {
 				requestAnimFrame(mainLoop);
 				a.update();
-				var adjust = controller.update(a.block.x, 0);
+				var adjust = controller.update(a.block.x, 0)/100000;
 				a.seeSaw.angle += adjust;
 			})();
 
