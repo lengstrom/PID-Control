@@ -1,6 +1,18 @@
 <html>
 	<head>
 		<title>PID Control</title>
+		<style type="text/css">
+			#c {
+				width:500px;
+				height:500px;
+				position:relative;
+				padding-left: 30px;
+				padding-top: 30px;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id = 'c' width = '500' height = '500'></canvas>
 		<script type="text/javascript">
 			window.requestAnimFrame = (function() {
 				return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
@@ -8,11 +20,11 @@
 				};
 			})();
 
-			function PIDController() {
+			function PIDController(opts) {
 				this.initialized = false;
 				var lastTime = 0;
 				var lastError = false;
-				this.init = funciton() {
+				this.init = function(opts) {
 					this.initialized = true;
 					this.p = 0;
 					this.i = 0;
@@ -21,6 +33,10 @@
 					this.integral = 0;
 					lastTime = (new Date()).getTime();
 					lastError = false;
+
+					for (var i in opts) {
+						this[i] = opts[i];
+					}
 				};
 
 				this.run = function() {
@@ -45,15 +61,23 @@
 					var updateTerm = (pTerm + iTerm + dTerm)/dt;
 					return updateTerm;
 				}
+
+				this.init(opts);
 			}
 
-			function PIDCanvas() {
+			function PIDCanvas(c) {
 				var lastTime = 0;
 				var canvas = false;
 				var ctx = false;
 				this.init = function(c) {
+					debugger;
 					canvas = document.getElementById(c);
 					ctx = canvas.getContext('2d');
+					for (var i in opts) {
+						this[i] = opts[i];
+					}
+
+					requestAnimFrame(this.update)
 				};
 
 				this.block = {
@@ -70,6 +94,7 @@
 
 				this.update = function() {
 					this.draw();
+					requestAnimFrame(this.update);
 				};
 
 				this.draw = function() {
@@ -102,6 +127,8 @@
 					ctx.lineTo(points[0]);
 					ctx.stroke();
 				};
+
+				this.init(c);
 			}
 
 			function rotatePoint(p, theta) {
@@ -113,9 +140,9 @@
 					y: rotY
 				};
 			}
+
+			var a = new PIDCanvas('c');
+
 		</script>
-	</head>
-	<body>
-		<canvas id = 'c'></canvas>
 	</body>
 </html>
