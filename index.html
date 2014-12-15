@@ -8,10 +8,12 @@
 				};
 			})();
 
-			function PIDController(id) {
+			function PIDController() {
+				this.initialized = false;
 				var lastTime = 0;
 				var lastError = false;
 				this.init = funciton() {
+					this.initialized = true;
 					this.p = 0;
 					this.i = 0;
 					this.d = 0;
@@ -43,11 +45,74 @@
 					var updateTerm = (pTerm + iTerm + dTerm)/dt;
 					return updateTerm;
 				}
-
 			}
 
-			var a = new PIDCanvas('c');
-			a.run();
+			function PIDCanvas() {
+				var lastTime = 0;
+				var canvas = false;
+				var ctx = false;
+				this.init = function(c) {
+					canvas = document.getElementById(c);
+					ctx = canvas.getContext('2d');
+				};
+
+				this.block = {
+					x:0,
+					m:15,
+					k_f:.3
+				};
+
+				this.seeSaw = {
+					theta:0,
+					length:300,
+					height:20
+				};
+
+				this.update = function() {
+					this.draw();
+				};
+
+				this.draw = function() {
+					var center = {
+						x:canvas.width/2,
+						y:canvas.height/2
+					};
+
+					var p1 = {x:-this.seeSaw.length/2, y:-this.seeSaw.height/2};
+					var p2 = {x:this.seeSaw.length/2, y:-this.seeSaw.height/2};
+					var p3 = {x:this.seeSaw.length/2, y:this.seeSaw.height/2};
+					var p4 = {x:-this.seeSaw.length/2, y:this.seeSaw.height/2};
+					var points = [p1, p2, p3, p4];
+					var t = this;
+					points = map(function(p) {
+						return rotatePoint(p, t.seeSaw.theta)
+					}, points);
+
+					points = map(function(p) {
+						return {x:p.x + center.x, y:p.x + center.y};
+					}, points);
+
+					ctx.strokeStyle = '#000';
+					ctx.lineWidth = 3;
+					ctx.beginPath();
+					ctx.moveTo(points[0]);
+					ctx.lineTo(points[1]);
+					ctx.lineTo(points[2]);
+					ctx.lineTo(points[3]);
+					ctx.lineTo(points[0]);
+					ctx.stroke();
+				};
+			}
+
+			function rotatePoint(p, theta) {
+				var rotX = Math.cos(thetaRad) * p.x - Math.sin(thetaRad) * p.y;
+				var rotY = Math.sin(thetaRad) * p.x + Math.cos(thetaRad) * p.y;
+
+				return {
+					x: rotX,
+					y: rotY
+				};
+			}
 		</script>
 	</head>
 	<body>
