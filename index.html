@@ -3,8 +3,8 @@
 		<title>PID Control</title>
 		<style type="text/css">
 			#c {
-				width:500px;
-				height:500px;
+				width:1000px;
+				height:1000px;
 				position:relative;
 				padding-left: 30px;
 				padding-top: 30px;
@@ -12,7 +12,7 @@
 		</style>
 	</head>
 	<body>
-		<canvas id = 'c' width = '500' height = '500'></canvas>
+		<canvas id = 'c' width = '1000' height = '1000'></canvas>
 		<script type="text/javascript">
 			window.requestAnimFrame = (function() {
 				return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
@@ -45,7 +45,7 @@
 
 				this.update = function(currentValue, targetValue) {
 					var currentTime = (new Date()).getTime();
-					var dt = currentTime - lastTime;
+					var dt = (currentTime - lastTime)/200;
 					lastTime = currentTime;
 					var currentError = (targetValue - currentValue);
 					var pTerm = currentError * this.p;
@@ -71,6 +71,7 @@
 				var canvas = false;
 				var ctx = false;
 				this.init = function(c) {
+					lastTime = (new Date()).getTime();
 					canvas = document.getElementById(c);
 					ctx = canvas.getContext('2d');
 					if (opts in window) {
@@ -84,7 +85,8 @@
 
 				this.block = {
 					x:0,
-					m:15,
+					m:1,
+					g:9.8,
 					dim:10,
 					k_f:.3,
 					ax:0,
@@ -92,8 +94,8 @@
 				};
 
 				this.seeSaw = {
-					theta:0.0,
-					length:300,
+					angle:0.2,
+					length:800,
 					height:20
 				};
 
@@ -110,7 +112,7 @@
 					var p3 = {x:this.seeSaw.length/2, y:this.seeSaw.height/2};
 					var p4 = {x:-this.seeSaw.length/2, y:this.seeSaw.height/2};
 					var points = [p1, p2, p3, p4];
-					points = points.map(function(p) {return rotatePoint(p, t.seeSaw.theta)});
+					points = points.map(function(p) {return rotatePoint(p, t.seeSaw.angle)});
 					points = points.map(function(p) {return {x:p.x + center.x, y:p.y + center.y};});
 
 					ctx.strokeStyle = '#000';
@@ -131,7 +133,7 @@
 					points = [p1, p2, p3, p4];
 
 					points = points.map(function(p) {return {x:p.x + t.block.x, y:p.y - t.seeSaw.height};});
-					points = points.map(function(p) {return rotatePoint(p, t.seeSaw.theta)});
+					points = points.map(function(p) {return rotatePoint(p, t.seeSaw.angle)});
 					points = points.map(function(p) {return {x:p.x + center.x, y:p.y + center.y};});
 
 					ctx.strokeStyle = '#000';
@@ -143,10 +145,29 @@
 					ctx.lineTo(points[3].x,points[3].y);
 					ctx.lineTo(points[0].x,points[0].y);
 					ctx.stroke();
+				};
 
+				this.updatePhysics = function() {
+					currentTime = (new Date()).getTime();
+					var dt = (currentTime - lastTime)/200;
+					var f = t.block.k_f * t.block.m * t.block.g * Math.abs(Math.cos(t.seeSaw.angle));
+					var dax = Math.sin(t.seeSaw.angle) * t.block.g * t.block.m;
+					if (dax > 0) {
+						dax -= f;
+						if (dax < 0) dax = 0;
+					} else {
+						dax += f; 
+						if (dax > 0) dax = 0;
+					}
+
+					t.block.ax += dax * dt;
+					t.block.vx += t.block.ax;
+					t.block.x += t.block.vx;
+					lastTime = currentTime;
 				};
 
 				this.update = function() {
+					t.updatePhysics();
 					t.draw();
 					requestAnimFrame(t.update);
 				};
@@ -165,6 +186,11 @@
 			}
 
 			var a = new PIDCanvas('c');
+
+			document.getElementById('c').addEventListener('mousemove', function(e) {
+				var angle = Math.atanh((e.y - 500)/(e.x - 500))
+				a.seeSaw.angle = angle;
+			});
 
 		</script>	
 	</body>
