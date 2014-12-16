@@ -85,14 +85,14 @@
 					m:15,
 					g:9.8,
 					dim:10,
-					k_f:0,
+					k_f:.10,
 					ax:0,
 					vx:0
 				};
 
 				this.seeSaw = {
 					angle:0,
-					length:800,
+					length:1600,
 					height:20
 				};
 
@@ -193,7 +193,7 @@
 			}
 
 			var a = new PIDCanvas('c');
-			var controller = new PIDController({p:2, i:.001, d:300});
+			var controller = new PIDController({p:.1, i:0, d:0});
 
 			// document.getElementById('c').addEventListener('mousemove', function(e) {
 			// 	var angle = Math.atanh((e.y - parseInt(document.getElementById('c').height)/2)/(e.x - parseInt(document.getElementById('c').width)/2));
